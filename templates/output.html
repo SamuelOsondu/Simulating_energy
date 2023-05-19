@@ -1,0 +1,40 @@
+<!-- results.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulator Results</title>
+    <style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    </style>
+</head>
+<body>
+    <h1>Simulator Results</h1>
+    <!-- Display the simulation results here -->
+    <table>
+        <tr>
+            <th>Time</th>
+            <th>Eload</th>
+            <th>Epvg</th>
+            <th>EpvgI</th>
+            <th>Enet</th>
+            <th>Esur</th>
+            <th>BAT-I</th>
+            <th>BA-L</th>
+            <th>BA_SOC</th>
+            <th>Ebmg</th>
+            <th>BMGS</th>
+            <th>Eunm</th>
+            <th>Esi</th>
+            <th>Cost</th>
+            <!-- Add more table columns as needed -->
+        </tr>
+        {% for row in results %}
+        <tr>
+            {% for value in row %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!-- input_form.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulator</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Simulator</h1>
+    <form action="/" method="POST">
+        <label for="solar_area">Solar Area:</label>
+        <input type="number" name="solar_area" required step="0.01"><br>
+
+        <label for="battery_capacity">Battery Capacity:</label>
+        <input type="number" name="battery_capacity" required step="0.01"><br>
+
+        <label for="biomass_capacity">Biomass Capacity:</label>
+        <input type="number" name="biomass_capacity" required step="0.01"><br>
+
+        <label for="solar_cost">Solar Cost:</label>
+        <input type="number" name="solar_cost" required step="0.01"><br>
+
+        <label for="battery_cost">Battery Cost:</label>
+        <input type="number" name="battery_cost" required step="0.01"><br>
+
+        <label for="biomass_cost">Biomass Cost:</label>
+        <input type="number" name="biomass_cost" required step="0.01"><br>
+
+        <input type="submit" value="Run Simulator">
+    </form>
+</body>
+</html>
