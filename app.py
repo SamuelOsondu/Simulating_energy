@@ -56,7 +56,7 @@ class HybridEnergySystem(object):
                 cost = self.solar_cost * epvg_inv
                 self.total_cost += cost
                 # Shouldn't it be the used epv itself?
-                if self.battery_soc != 1:
+                if self.battery_soc < 1:
                     ebattery = 0.99 * e_surplus
                     self.battery_energy = ebattery + self.battery_energy
                     self.battery_soc = self.battery_energy / self.battery_capacity
