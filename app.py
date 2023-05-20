@@ -95,7 +95,7 @@ class HybridEnergySystem(object):
                                 else:
                                     batterycharge_left -= bmg_left
 
-                        enet = self.biomass_capacity - enet
+                        # enet = self.biomass_capacity - enet
 
 
             table.append([
