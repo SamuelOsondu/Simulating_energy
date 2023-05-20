@@ -47,43 +47,52 @@ class HybridEnergySystem(object):
             bmg_status = 'OFF'
             eunmet = 0
             ebattery = 0
-            e_surplus = 0
+            solar_surplus = 0
             batt_inv = 0
-
             sink = 0
+
+            # Drawing from the solar energy if sufficient and discharging the solar
             if epvg_inv >= load >= 0:
-                e_surplus = epvg_inv - load
+                solar_surplus = epvg_inv - load
+                epvg_inv -= load
                 cost = self.solar_cost * epvg_inv
                 self.total_cost += cost
-                # Shouldn't it be the used epv itself?
+                # Charging the battery
                 if self.battery_soc < 1:
-                    ebattery = 0.99 * e_surplus
+                    ebattery = 0.99 * solar_surplus
                     self.battery_energy = ebattery + self.battery_energy
                     self.battery_soc = self.battery_energy / self.battery_capacity
                 else:
-                    sink = e_surplus
+                    # Powering the sink cause of surplus solar after charging the battery
+                    sink = solar_surplus
 
             else:
+                # Drawing the max available solar energy
                 enet = load - epvg_inv
+                epvg_inv = 0
                 cost = self.solar_cost * epvg_inv
                 self.total_cost += cost
 
+                # Discharging from battery
                 ebattery = 1.00 * self.battery_energy
                 if self.battery_soc >= 0.2 and ebattery >= enet:
+                    self.battery_energy = ebattery - enet
                     cost = self.battery_cost * enet
                     self.total_cost += cost
-                    self.battery_energy = ebattery - enet
                     self.battery_soc = self.battery_energy / self.battery_capacity
                     batt_inv += enet
                 else:
                     bmg_status = "ON"
                     cost = self.biomass_cost * enet
                     self.total_cost += cost
+                    # Discharging the enet with the availaible biomass and adding the unmet
                     if self.biomass_capacity < enet:
+                        enet -= self.biomass_capacity
                         eunmet = enet - self.biomass_capacity
 
                     else:
                         bmg_left = self.biomass_capacity - enet
+                        enet = 0
                         if bmg_left > 0:
                             batterycharge_left = self.battery_capacity - self.battery_energy
                             if batterycharge_left > 0:
@@ -95,7 +104,6 @@ class HybridEnergySystem(object):
                                 else:
                                     batterycharge_left -= bmg_left
 
-                        # enet = self.biomass_capacity - enet
 
             def convert_to_decimal_places(float_list):
                 decimal_list = []
@@ -105,7 +113,7 @@ class HybridEnergySystem(object):
                 return decimal_list
 
             formatted_list = convert_to_decimal_places([
-                epvg, epvg_inv, enet, e_surplus, batt_inv, ebattery, self.battery_soc,
+                epvg, epvg_inv, enet, solar_surplus, batt_inv, ebattery, self.battery_soc,
                 self.biomass_capacity, eunmet, sink, cost
             ])
 
@@ -133,9 +141,6 @@ def simulator():
         energy_system = HybridEnergySystem(env, solar_area, battery_capacity, biomass_capacity, solar_cost,
                                            battery_cost, biomass_cost, initial_batterysoc)
         result_table = energy_system.solar()
-
-        # formatted_table = format_table(result_table, ["epvg", "epvg_inv", "enet", "e_surplus", "batt_inv", "ebattery",
-        #                           "self.battery_soc", "self.biomass_capacity", "eunmet", "sink", "cost"])
 
         return render_template('output.html', results=result_table)
     return render_template('input.html')
