@@ -39,7 +39,6 @@ class HybridEnergySystem(object):
             epvg = self.solar_area * 0.15 * solar_insolation[hour]
             epvg_inv = epvg * 0.95
             bmg_status = 'OFF'
-            battery_energy = 0
             solar_surplus = 0
             batt_inv = 0
             eunmet = 0
@@ -48,23 +47,23 @@ class HybridEnergySystem(object):
             cost = 0
 
             # Drawing from the solar energy if sufficient and discharging the solar
-            if epvg_inv >= load:
+            if epvg_inv >= load > 0:
                 solar_surplus = epvg_inv - load
                 epvg_inv -= load
                 cost = self.solar_cost * epvg_inv
                 # Charging the battery
                 if solar_surplus > 0:
-                    batterycharge_left = self.battery_capacity - battery_energy
+                    batterycharge_left = self.battery_capacity - self.battery_energy
                     if batterycharge_left > 0:
                         if solar_surplus >= batterycharge_left:
                             solar_surplus -= batterycharge_left
-                            battery_energy += (batterycharge_left * 0.99)
-                            self.battery_soc = battery_energy / self.battery_capacity
+                            self.battery_energy += (batterycharge_left * 0.99)
+                            self.battery_soc = self.battery_energy / self.battery_capacity
                             sink = solar_surplus
                         else:
                             batterycharge_left -= solar_surplus
-                            battery_energy += (solar_surplus * 0.99)
-                            self.battery_soc = battery_energy / self.battery_capacity
+                            self.battery_energy += (solar_surplus * 0.99)
+                            self.battery_soc = self.battery_energy / self.battery_capacity
                     else:
                         # Powering the sink cause of surplus solar after charging the battery
                         sink = solar_surplus
@@ -76,11 +75,11 @@ class HybridEnergySystem(object):
                 epvg_inv = 0
 
                 # Discharging from battery
-                if self.battery_soc >= 0.2 and battery_energy >= enet:
-                    battery_energy -= enet
+                if self.battery_soc >= 0.2 and self.battery_energy >= enet:
+                    self.battery_energy -= enet
                     cost = self.battery_cost * enet
                      
-                    self.battery_soc = battery_energy / self.battery_capacity
+                    self.battery_soc = self.battery_energy / self.battery_capacity
                     batt_inv += enet
                 else:
                     bmg_status = "ON"
@@ -95,12 +94,12 @@ class HybridEnergySystem(object):
                         bmg_left = self.biomass_capacity - enet
                         enet = 0
                         if bmg_left > 0:
-                            batterycharge_left = self.battery_capacity - battery_energy
+                            batterycharge_left = self.battery_capacity - self.battery_energy
                             if batterycharge_left > 0:
                                 if bmg_left >= batterycharge_left:
                                     bmg_left -= batterycharge_left
-                                    battery_energy += batterycharge_left
-                                    self.battery_soc = battery_energy / self.battery_capacity
+                                    self.battery_energy += batterycharge_left
+                                    self.battery_soc = self.battery_energy / self.battery_capacity
                                     sink = bmg_left
                                 else:
                                     batterycharge_left -= bmg_left
