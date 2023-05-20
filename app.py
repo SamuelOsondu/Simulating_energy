@@ -97,31 +97,25 @@ class HybridEnergySystem(object):
 
                         # enet = self.biomass_capacity - enet
 
+            def convert_to_decimal_places(float_list):
+                decimal_list = []
+                for num in float_list:
+                    decimal_num = round(num, 4) if num % 1 != 0 else num
+                    decimal_list.append(decimal_num)
+                return decimal_list
+
+            formatted_list = convert_to_decimal_places([
+                epvg, epvg_inv, enet, e_surplus, batt_inv, ebattery, self.battery_soc,
+                self.biomass_capacity, eunmet, sink, cost
+            ])
 
             table.append([
-                time_range[hour], load, epvg, epvg_inv, enet, e_surplus, batt_inv, ebattery, self.battery_soc,
-                self.biomass_capacity, bmg_status,
-                eunmet, sink, cost
+                time_range[hour], load, formatted_list[0], formatted_list[1], formatted_list[2], formatted_list[3],
+                formatted_list[4], formatted_list[5], formatted_list[6], formatted_list[7], bmg_status,
+                formatted_list[8], formatted_list[9], formatted_list[10],
             ])
 
         return table
-
-
-def format_table(table, format_columns):
-    formatted_table = []
-    column_names = table[0]  # Assuming the first row contains column names
-    format_indices = [i for i, name in enumerate(column_names) if name in format_columns]
-
-    for row in table:
-        formatted_row = []
-        for i, value in enumerate(row):
-            if i in format_indices and isinstance(value, float):
-                formatted_value = "{:.4f}".format(value)
-                formatted_row.append(formatted_value)
-            else:
-                formatted_row.append(value)
-        formatted_table.append(formatted_row)
-    return formatted_table
 
 
 @app.route('/', methods=['GET', 'POST'])
