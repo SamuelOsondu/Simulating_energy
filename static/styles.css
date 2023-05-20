@@ -17,11 +17,13 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 .table{
-    margin-left: 20px;
+    margin-left: 70px;
+    text-align: center;
 }
 
 h1 {
     color: #333333;
+    text-align: center;
 }
 
 form {

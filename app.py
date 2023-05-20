@@ -5,13 +5,13 @@ app = Flask(__name__)
 
 
 class HybridEnergySystem(object):
-    def __init__(self, env, solar_area, battery_capacity, biomass_capacity, solar_cost, battery_cost, biomass_cost):
+    def __init__(self, env, solar_area, battery_capacity, biomass_capacity, solar_cost, battery_cost, biomass_cost, initial_batterysoc):
         self.env = env
         self.solar_area = solar_area
         self.battery_capacity = battery_capacity
         self.biomass_capacity = biomass_capacity
-        self.battery_soc = 0.20  # Initial battery state of charge
-        self.battery_energy = self.battery_soc * battery_capacity
+        self.battery_soc = initial_batterysoc
+        self.battery_energy = self.battery_soc * self.battery_capacity
         self.total_cost = 0
         self.solar_cost = solar_cost
         self.battery_cost = battery_cost
@@ -23,20 +23,33 @@ class HybridEnergySystem(object):
             6.375, 8.075, 5.075, 8.075, 9.575, 9.575, 8.9, 10.4, 10.8, 10.8,
             5.8, 2.4, 1.4
         ]
-        solar_insolation = 3.91
+
+        solar_insolation = [
+            0, 0, 0, 0, 0, 0, 0, 0, 1.173, 1.173, 1.173, 2.346, 3.91, 3.91,
+            3.91, 3.91, 2.346, 1.173, 1.173, 1.173, 0, 0, 0, 0
+        ]
+        time_range = [
+            "0:00-1:00", "1:00-2:00", "2:00-3:00", "3:00-4:00", "4:00-5:00", "5:00-6:00",
+            "6:00-7:00", "7:00-8:00", "8:00-9:00", "9:00-10:00", "10:00-11:00", "11:00-12:00",
+            "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00", "16:00-17:00", "17:00-18:00",
+            "18:00-19:00", "19:00-20:00", "20:00-21:00", "21:00", "22:00-23:00", "23:00-24:00"
+        ]
+
         efficiency = 0.95
 
         table = []  # Empty list to store simulation results
 
         for hour in range(24):
             load = loads[hour]
-            epvg = self.solar_area * 0.15 * solar_insolation
+            epvg = self.solar_area * 0.15 * solar_insolation[hour]
             epvg_inv = epvg * efficiency
             enet = 0
             bmg_status = 'OFF'
             eunmet = 0
             ebattery = 0
             e_surplus = 0
+            batt_inv = 0
+
             sink = 0
             if epvg_inv >= load >= 0:
                 e_surplus = epvg_inv - load
@@ -61,6 +74,7 @@ class HybridEnergySystem(object):
                     self.total_cost += cost
                     self.battery_energy = ebattery - enet
                     self.battery_soc = self.battery_energy / self.battery_capacity
+                    batt_inv += enet
                 else:
                     bmg_status = "ON"
                     cost = self.biomass_cost * enet
@@ -69,14 +83,45 @@ class HybridEnergySystem(object):
                         eunmet = enet - self.biomass_capacity
 
                     else:
+                        bmg_left = self.biomass_capacity - enet
+                        if bmg_left > 0:
+                            batterycharge_left = self.battery_capacity - self.battery_energy
+                            if batterycharge_left > 0:
+                                if bmg_left >= batterycharge_left:
+                                    bmg_left -= batterycharge_left
+                                    self.battery_energy += batterycharge_left
+                                    self.battery_soc = self.battery_energy / self.battery_capacity
+                                    sink = bmg_left
+                                else:
+                                    batterycharge_left -= bmg_left
+
                         enet = self.biomass_capacity - enet
+
+
             table.append([
-                hour, load, epvg, epvg_inv, enet, e_surplus, ebattery, self.battery_energy, self.battery_soc,
+                time_range[hour], load, epvg, epvg_inv, enet, e_surplus, batt_inv, ebattery, self.battery_soc,
                 self.biomass_capacity, bmg_status,
                 eunmet, sink, cost
             ])
 
         return table
+
+
+def format_table(table, format_columns):
+    formatted_table = []
+    column_names = table[0]  # Assuming the first row contains column names
+    format_indices = [i for i, name in enumerate(column_names) if name in format_columns]
+
+    for row in table:
+        formatted_row = []
+        for i, value in enumerate(row):
+            if i in format_indices and isinstance(value, float):
+                formatted_value = "{:.4f}".format(value)
+                formatted_row.append(formatted_value)
+            else:
+                formatted_row.append(value)
+        formatted_table.append(formatted_row)
+    return formatted_table
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -90,26 +135,13 @@ def simulator():
         solar_cost = float(request.form['solar_cost'])
         battery_cost = float(request.form['battery_cost'])
         biomass_cost = float(request.form['biomass_cost'])
+        initial_batterysoc = float(request.form['initial_batterysoc'])
         energy_system = HybridEnergySystem(env, solar_area, battery_capacity, biomass_capacity, solar_cost,
-                                           battery_cost, biomass_cost)
+                                           battery_cost, biomass_cost, initial_batterysoc)
         result_table = energy_system.solar()
-        #
-        # for row in result_table:
-        #     formatted_row = []
-        #     for value in row:
-        #         if isinstance(value, str):
-        #             formatted_row.append(value)
-        #         else:
-        #             formatted_row.append(f"{value:.4f}")
-        #     print("\t".join(formatted_row))
-        #
-        #     if row[0] == 23:
-        #         break  # Stop the simulation after hour 23
-        #     #
-        #
-        # headers = ["Time", "Eload", "Epvg", "EpvgI", "Enet", "Esur", "BAT-I", "BA-L", "BA_SOC", "Ebmg", "BMGS", "Eunm",
-        #            "Esi",
-        #            "Cost"]
+
+        # formatted_table = format_table(result_table, ["epvg", "epvg_inv", "enet", "e_surplus", "batt_inv", "ebattery",
+        #                           "self.battery_soc", "self.biomass_capacity", "eunmet", "sink", "cost"])
 
         return render_template('output.html', results=result_table)
     return render_template('input.html')
