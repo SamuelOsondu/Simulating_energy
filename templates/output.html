@@ -3,14 +3,16 @@
 <html>
 <head>
     <title>Simulator Results</title>
-    <style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    </style>
+
 </head>
 <body>
     <h1>Simulator Results</h1>
     <!-- Display the simulation results here -->
-    <table>
+ <table class="table-bordered  table-hover">
+    <thead class="thead-dark">
         <tr>
             <th>Time</th>
             <th>Eload</th>
@@ -28,6 +30,8 @@
             <th>Cost</th>
             <!-- Add more table columns as needed -->
         </tr>
+    </thead>
+    <tbody>
         {% for row in results %}
         <tr>
             {% for value in row %}
@@ -35,6 +39,8 @@
             {% endfor %}
         </tr>
         {% endfor %}
-    </table>
+    </tbody>
+</table>
+
 </body>
 </html>
