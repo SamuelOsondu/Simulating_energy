@@ -42,6 +42,8 @@ class HybridEnergySystem(object):
             solar_surplus = 0
             batt_inv = 0
             eunmet = 0
+            bmg_left = 0
+            bio_capacity = 0
             sink = 0
             enet = 0
             cost = 0
@@ -55,7 +57,7 @@ class HybridEnergySystem(object):
                     batterycharge_left = self.battery_capacity - self.battery_energy
                     if batterycharge_left > 0:
                         if solar_surplus >= batterycharge_left:
-                            solar_surplus -= batterycharge_left
+                            # solar_surplus -= batterycharge_left
                             self.battery_energy += (batterycharge_left * 0.99)
                             self.battery_soc = self.battery_energy / self.battery_capacity
                             sink = solar_surplus
@@ -82,6 +84,7 @@ class HybridEnergySystem(object):
                     batt_inv += enet
                 else:
                     bmg_status = "ON"
+                    bio_capacity = self.biomass_capacity
                     cost = self.biomass_cost * self.biomass_capacity
                      
                     # Discharging the enet with the availaible biomass and adding the unmet
@@ -96,12 +99,14 @@ class HybridEnergySystem(object):
                             batterycharge_left = self.battery_capacity - self.battery_energy
                             if batterycharge_left > 0:
                                 if bmg_left >= batterycharge_left:
-                                    bmg_left -= batterycharge_left
+                                    # bmg_left -= batterycharge_left
                                     self.battery_energy += batterycharge_left
                                     self.battery_soc = self.battery_energy / self.battery_capacity
-                                    sink = bmg_left
+                                    sink = bmg_left - batterycharge_left
                                 else:
-                                    batterycharge_left -= bmg_left
+                                    # batterycharge_left -= bmg_left
+                                    self.battery_energy += bmg_left
+                                    self.battery_soc = self.battery_energy / self.battery_capacity
 
             def convert_to_decimal_places(input_list):
                 converted_list = []
@@ -112,12 +117,12 @@ class HybridEnergySystem(object):
 
             formatted_list = convert_to_decimal_places([
                 epvg, epvg_inv, enet, solar_surplus, batt_inv, self.battery_energy, self.battery_soc,
-                self.biomass_capacity, eunmet, sink, cost, load
+                bio_capacity, eunmet, sink, cost, load, bmg_left
             ])
 
             table.append([
                 time_range[hour], formatted_list[11], formatted_list[0], formatted_list[1], formatted_list[2], formatted_list[3],
-                formatted_list[4], formatted_list[5], formatted_list[6], formatted_list[7], bmg_status,
+                formatted_list[4], formatted_list[5], formatted_list[6], formatted_list[7], bmg_status, formatted_list[12],
                 formatted_list[8], formatted_list[9], formatted_list[10],
             ])
 
