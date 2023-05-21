@@ -122,7 +122,7 @@ class HybridEnergySystem(object):
 
             table.append([
                 time_range[hour], formatted_list[11], formatted_list[0], formatted_list[1], formatted_list[2], formatted_list[3],
-                formatted_list[4], formatted_list[5], formatted_list[6], formatted_list[7], bmg_status, formatted_list[12],
+                formatted_list[4], formatted_list[7], bmg_status, formatted_list[12], formatted_list[5], formatted_list[6],
                 formatted_list[8], formatted_list[9], formatted_list[10],
             ])
 
