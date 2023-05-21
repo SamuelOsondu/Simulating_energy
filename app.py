@@ -16,14 +16,14 @@ class HybridEnergySystem(object):
 
     def solar(self):
         loads = [
-            1.4, 1.4, 1.4, 1.4, 2.4, 2.6, 3.2, 9.975, 7.775, 7.075, 6.375,
-            6.375, 8.075, 5.075, 8.075, 9.575, 9.575, 8.9, 10.4, 10.8, 10.8,
-            5.8, 2.4, 1.4
+            3.4, 3.4, 3.4, 3.4, 4.4, 4.6, 5.2, 11.975, 9.775, 9.075, 8.375,
+            8.375, 10.075, 7.075, 10.075, 11.575, 11.575, 10.9, 12.4, 12.8, 12.8,
+            7.8, 4.4, 3.4
         ]
 
         solar_insolation = [
-            0, 0, 0, 0, 0, 0, 0, 0, 1.173, 1.173, 1.173, 2.346, 3.91, 3.91,
-            3.91, 3.91, 2.346, 1.173, 1.173, 1.173, 0, 0, 0, 0
+            0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.5, 1.0, 2.346, 3.91, 3.91,
+            3.91, 3.91, 0.5, 1.10, 0, 0, 0, 0, 0, 0
         ]
         time_range = [
             "0:00-1:00", "1:00-2:00", "2:00-3:00", "3:00-4:00", "4:00-5:00", "5:00-6:00",
@@ -49,7 +49,6 @@ class HybridEnergySystem(object):
             # Drawing from the solar energy if sufficient and discharging the solar
             if epvg_inv >= load > 0:
                 solar_surplus = epvg_inv - load
-                epvg_inv -= load
                 cost = self.solar_cost * epvg_inv
                 # Charging the battery
                 if solar_surplus > 0:
@@ -72,7 +71,7 @@ class HybridEnergySystem(object):
                 # Drawing the max available solar energy
                 cost = self.solar_cost * epvg_inv
                 enet = load - epvg_inv
-                epvg_inv = 0
+                # epvg_inv = 0
 
                 # Discharging from battery
                 if self.battery_soc >= 0.2 and self.battery_energy >= enet:
