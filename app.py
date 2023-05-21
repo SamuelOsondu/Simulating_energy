@@ -49,7 +49,7 @@ class HybridEnergySystem(object):
             # Drawing from the solar energy if sufficient and discharging the solar
             if epvg_inv >= load > 0:
                 solar_surplus = epvg_inv - load
-                cost = self.solar_cost * epvg_inv
+                cost = self.solar_cost * epvg
                 # Charging the battery
                 if solar_surplus > 0:
                     batterycharge_left = self.battery_capacity - self.battery_energy
@@ -69,7 +69,7 @@ class HybridEnergySystem(object):
 
             else:
                 # Drawing the max available solar energy
-                cost = self.solar_cost * epvg_inv
+                cost = self.solar_cost * epvg
                 enet = load - epvg_inv
                 # epvg_inv = 0
 
@@ -82,7 +82,7 @@ class HybridEnergySystem(object):
                     batt_inv += enet
                 else:
                     bmg_status = "ON"
-                    cost = self.biomass_cost * enet
+                    cost = self.biomass_cost * self.biomass_capacity
                      
                     # Discharging the enet with the availaible biomass and adding the unmet
                     if self.biomass_capacity < enet:
@@ -106,7 +106,7 @@ class HybridEnergySystem(object):
             def convert_to_decimal_places(float_list):
                 decimal_list = []
                 for num in float_list:
-                    decimal_num = round(num, 4) if num % 1 != 0 else num
+                    decimal_num = round(num, 2)  # if num % 1 != 0 else num
                     decimal_list.append(decimal_num)
                 return decimal_list
 
