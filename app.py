@@ -91,7 +91,7 @@ class HybridEnergySystem(object):
 
                     else:
                         bmg_left = self.biomass_capacity - enet
-                        enet = 0
+                        # enet = 0
                         if bmg_left > 0:
                             batterycharge_left = self.battery_capacity - self.battery_energy
                             if batterycharge_left > 0:
