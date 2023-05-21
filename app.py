@@ -103,20 +103,20 @@ class HybridEnergySystem(object):
                                 else:
                                     batterycharge_left -= bmg_left
 
-            def convert_to_decimal_places(float_list):
-                decimal_list = []
-                for num in float_list:
-                    decimal_num = round(num, 2)  # if num % 1 != 0 else num
-                    decimal_list.append(decimal_num)
-                return decimal_list
+            def convert_to_decimal_places(input_list):
+                converted_list = []
+                for num in input_list:
+                    converted_num = "{:.2f}".format(num)
+                    converted_list.append(converted_num)
+                return converted_list
 
             formatted_list = convert_to_decimal_places([
                 epvg, epvg_inv, enet, solar_surplus, batt_inv, self.battery_energy, self.battery_soc,
-                self.biomass_capacity, eunmet, sink, cost
+                self.biomass_capacity, eunmet, sink, cost, load
             ])
 
             table.append([
-                time_range[hour], load, formatted_list[0], formatted_list[1], formatted_list[2], formatted_list[3],
+                time_range[hour], formatted_list[11], formatted_list[0], formatted_list[1], formatted_list[2], formatted_list[3],
                 formatted_list[4], formatted_list[5], formatted_list[6], formatted_list[7], bmg_status,
                 formatted_list[8], formatted_list[9], formatted_list[10],
             ])
