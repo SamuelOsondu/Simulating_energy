@@ -86,7 +86,7 @@ class HybridEnergySystem(object):
                      
                     # Discharging the enet with the availaible biomass and adding the unmet
                     if self.biomass_capacity < enet:
-                        enet -= self.biomass_capacity
+                        # enet -= self.biomass_capacity
                         eunmet = enet - self.biomass_capacity
 
                     else:
