@@ -92,6 +92,14 @@ class HybridEnergySystem(object):
                         # enet -= self.biomass_capacity
                         eunmet = enet - self.biomass_capacity
 
+                        if self.battery_soc >= 0.2 and self.battery_energy >= eunmet:
+                            self.battery_energy -= eunmet
+                            cost = self.battery_cost * eunmet
+
+                            self.battery_soc = self.battery_energy / self.battery_capacity
+                            batt_inv += eunmet
+
+
                     else:
                         bmg_left = self.biomass_capacity - enet
                         # enet = 0
