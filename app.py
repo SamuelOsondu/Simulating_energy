@@ -1,4 +1,8 @@
 from flask import render_template, Flask, request
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import io
+import base64
 
 app = Flask(__name__)
 
@@ -136,6 +140,55 @@ class HybridEnergySystem(object):
 
         return table
 
+    def visualize(self, table):
+        # Extract the relevant data from the simulation results table
+        time_range = [entry[0] for entry in table]
+        loads = [float(entry[12]) for entry in table]
+        solar_surplus = [float(entry[3]) for entry in table]
+        batt_inv = [float(entry[5]) for entry in table]
+        bio_capacity = [float(entry[7]) for entry in table]
+        sink = [float(entry[9]) for entry in table]
+
+        # Create the figure and axes for the plot
+        fig, ax = plt.subplots(figsize=(12, 6), dpi=80)
+
+        # Set up the initial plot
+        ax.plot(time_range, loads, label='Load')
+        ax.plot(time_range, solar_surplus, label='Solar Surplus')
+        ax.plot(time_range, batt_inv, label='Battery Inv.')
+        ax.plot(time_range, bio_capacity, label='Bio Capacity')
+        ax.plot(time_range, sink, label='Sink')
+
+        ax.set_xlabel('Time Range')
+        ax.set_ylabel('Values')
+        ax.set_title('Hybrid Energy System Simulation')
+        ax.legend()
+
+        # Define the update function for the animation
+        def update(frame):
+            ax.cla()  # Clear the axes
+            ax.plot(time_range[:frame+1], loads[:frame+1], label='Load')
+            ax.plot(time_range[:frame+1], solar_surplus[:frame+1], label='Solar Surplus')
+            ax.plot(time_range[:frame+1], batt_inv[:frame+1], label='Battery Inv.')
+            ax.plot(time_range[:frame+1], bio_capacity[:frame+1], label='Bio Capacity')
+            ax.plot(time_range[:frame+1], sink[:frame+1], label='Sink')
+
+            ax.set_xlabel('Time Range')
+            ax.set_ylabel('Values')
+            ax.set_title('Hybrid Energy System Simulation')
+            ax.legend()
+
+        # Create the animation
+        ani = animation.FuncAnimation(fig, update, frames=len(table), interval=1000, blit=False)
+
+        # Save the animation as a GIF
+        gif_output = io.BytesIO()
+        ani.save("static/gif_output.gif", writer='pillow')
+        gif_output.seek(0)
+        gif_data = base64.b64encode(gif_output.getvalue()).decode('utf-8')
+
+        return gif_data
+
 
 @app.route('/', methods=['GET', 'POST'])
 def simulator():
@@ -152,8 +205,16 @@ def simulator():
                                            battery_cost, biomass_cost, initial_batterysoc)
         result_table = energy_system.solar()
 
-        return render_template('output.html', results=result_table)
+        gif_data = energy_system.visualize(result_table)  # Generate the animated graph and get the GIF data
+
+        return render_template('output.html', results=result_table, gif_data=gif_data)
     return render_template('input.html')
+
+
+@app.route('/visualize', methods=['GET', 'POST'])
+def visualize():
+
+    return render_template('visualize.html')
 
 
 if __name__ == '__main__':
