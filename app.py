@@ -150,7 +150,7 @@ class HybridEnergySystem(object):
         sink = [float(entry[9]) for entry in table]
 
         # Create the figure and axes for the plot
-        fig, ax = plt.subplots(figsize=(12, 6), dpi=80)
+        fig, ax = plt.subplots(figsize=(25, 8), dpi=60)
 
         # Set up the initial plot
         ax.plot(time_range, loads, label='Load')
